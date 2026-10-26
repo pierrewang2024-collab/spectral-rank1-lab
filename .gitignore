@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 实验产出（参考答案 spectral_energy_reference.json 已跟踪，学生的生成物忽略）
+spectral_energy.json
+spectral_energy_smoke.json
+my_probe/
+out_*/
+*.png
+*.pdf
+
+# 本地缓存
+.hf_cache/
+nltk_data/

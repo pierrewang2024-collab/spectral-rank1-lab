@@ -1,0 +1,5 @@
+# 任务一（谱分析）只需 numpy；以下为任务二（探针）完整依赖
+numpy>=1.24
+torch>=2.1
+transformers>=4.40
+datasets>=2.19
