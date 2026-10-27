@@ -34,17 +34,18 @@ python3 analysis/spectral_energy_analysis.py           # 全量：GPT-2 全 24 �
 
 ```bash
 pip install -r requirements.txt
-python3 analysis/export_fisher_probe_indices.py --n_frequency 1000 --output_dir my_probe
+python3 analysis/export_fisher_probe_indices.py --n_frequency 1000 \
+    --probe_mode offset --start_batch 0 --output_dir my_probe
 ```
 
-首次运行自动下载 GPT-2-Medium（~1.4GB）与 WebNLG。输出 `my_probe/fisher_indices.pt`（96 层 × [2,1000] 频点）。
+首次运行自动下载 GPT-2-Medium（~1.4GB）与 WebNLG。输出 `my_probe/fisher_indices.pt`（96 层 × [2,1000] 频点）。`--probe_mode offset --start_batch 0` 表示使用训练集前 64 条样本，即参考 checkpoint 的选点协议；不加这两个参数时脚本默认随机抽 64 条（用于稳健性对照），详见 `analysis/README.md`。
 
 ## 环境要求
 
 - Python 3.10+；任务一只需 numpy，任务二见 `requirements.txt`
 - 磁盘：克隆仓库 ~10MB；任务二另需 ~2GB（模型 + 数据）
 - GPU：不强制（CPU 可完成；有 GPU 更快）
-- 内存：任务二建议 16GB（8GB 机器把 `--probe_batch_size` 降到 4 并在报告注明）
+- 内存：任务二建议 16GB。8GB 机器可改用 `--probe_batch_size 4 --fisher_n_batches 16`（仍是同 64 条样本，但每个 batch 更小，Fisher 估计会略有不同，需在报告中注明），或使用免费 Colab
 
 ## 已知陷阱（开工前必读）
 
@@ -52,5 +53,5 @@ python3 analysis/export_fisher_probe_indices.py --n_frequency 1000 --output_dir 
 
 ## 引用
 
-- 基础方法 FourierFT：Gao et al., *FourierFT: Fine-Tuning in the Spectral Frequency Domain*, 2024（arXiv:2405.03003）
+- 基础方法 FourierFT：Z. Gao, Q. Wang, A. Chen, Z. Liu, B. Wu, L. Chen, J. Li. *Parameter-Efficient Fine-Tuning with Discrete Fourier Transform*. ICML 2024（arXiv:2405.03003）
 - 本仓库工具改编自课程组内部研究代码，仅用于教学。

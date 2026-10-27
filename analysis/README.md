@@ -1,6 +1,6 @@
-# analysis/ — 频域微调审计：Fisher 选点探针与谱分析工具
+# analysis/ — 频域微调：Fisher 选点探针与谱分析工具
 
-本目录是"频域微调：频点选择与谱结构分析"课程实验的工具包，改编自课程组内部研究代码。基础方法 FourierFT 见 Gao et al. 2024（arXiv:2405.03003）。
+本目录是"频域微调：频点选择与谱结构分析"课程实验的工具包，改编自课程组内部研究代码。基础方法 FourierFT 见 Gao et al., ICML 2024（arXiv:2405.03003）。
 
 ## 文件说明
 
@@ -41,15 +41,18 @@ python3 analysis/spectral_energy_analysis.py --smoke  # 自检：只算第 0 层
 ## 快速开始 2：重新生成 Fisher 热图/频点（需要 torch，联网下载模型与数据）
 
 ```bash
-pip install torch transformers datasets
+pip install -r requirements.txt
 # GPT-2-Medium（~1.4GB）与 WebNLG 首次运行自动下载
+# 参考协议 = 训练集前 64 条样本（8 batch × 8），与参考 checkpoint 的选点一致：
 python3 analysis/export_fisher_probe_indices.py \
-    --n_frequency 1000 --output_dir out_fisher_demo
+    --n_frequency 1000 --probe_mode offset --start_batch 0 --output_dir out_ref_window
 ```
 
-输出：`out_fisher_demo/fisher_indices.pt`（96 层 × [2,1000] 频点）与可审计的元数据 json。默认协议 = 训练集前 64 样本（8 batch × 8），与参考协议一致；换窗口用 `--probe_mode offset --start_batch 8`。
+输出：`out_ref_window/fisher_indices.pt`（96 层 × [2,1000] 频点）与元数据 json（含所用样本 ID；`overlap_with_default_head64=64` 说明用的正是参考窗口）。
 
-## 已知陷阱（来自主仓库开发史，学生必读）
+**注意脚本默认值**：不加 `--probe_mode` 时默认是 `random` 模式（用 `--probe_seed` 随机抽 64 条，与参考窗口几乎不重叠），用于"换一批探针样本，结论还稳吗"的对照实验；`--probe_mode offset --start_batch 8` 则取第 9–16 个 batch。
+
+## 已知陷阱（来自研究开发过程，学生必读）
 
 1. **FFT 网格尺寸**：重建 ΔW 必须按真实层尺寸 `(out_features, in_features)` 建 dense 谱矩阵。若用 `indices.max()+1` 推断网格，`mlp.c_proj` 的选点全在第 0 列时会被错推断成 1024×1，得到错误的"秩 1"（本脚本 v2 曾踩坑，v3 已修）。
 2. **Conv1D 转置**：HuggingFace GPT-2 的投影层是 `Conv1D`，权重存储为 `[in, out]`，与 `nn.Linear` 相反。谱统计前必须转成 `[out, in]`，否则行列集中度对调。
@@ -57,5 +60,5 @@ python3 analysis/export_fisher_probe_indices.py \
 
 ## 引用
 
-- 基础方法 FourierFT：Gao et al., *FourierFT: Fine-Tuning in the Spectral Frequency Domain*, 2024（arXiv:2405.03003）。
+- 基础方法 FourierFT：Z. Gao, Q. Wang, A. Chen, Z. Liu, B. Wu, L. Chen, J. Li. *Parameter-Efficient Fine-Tuning with Discrete Fourier Transform*. ICML 2024（arXiv:2405.03003）。
 - 探针协议（GPT-2-Medium / WebNLG / FP32 / 64 样本 / batch 8）与参考 checkpoint 的训练协议一致。
