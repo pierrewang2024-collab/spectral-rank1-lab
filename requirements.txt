@@ -1,5 +1,8 @@
-# 任务一（谱分析）只需 numpy；以下为任务二（探针）完整依赖
-numpy>=1.24
+# 任务一（谱分析）只需 numpy；以下为任务二（探针）完整依赖。
+# 版本锁定原因：WebNLG 为脚本式数据集，datasets>=4.0 已移除脚本加载支持；
+# analysis/_hf_compat.py 的兼容补丁针对 datasets 2.21 + huggingface_hub 0.24+ 编写。
+numpy>=1.24,<2.0
 torch>=2.1
-transformers>=4.40
-datasets>=2.19
+transformers>=4.40,<4.50
+datasets==2.21.0
+huggingface_hub>=0.24,<0.27
